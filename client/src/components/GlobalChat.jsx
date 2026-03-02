@@ -203,7 +203,7 @@ function GlobalChat({ socket, comments, onClose }) {
           onChange={handleInputChange}
         />
         <button
-          type="submit"
+          type="submit" disabled={sending}
           className="chat-send"
           disabled={sending || !newMessage.trim()}
         >
