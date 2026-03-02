@@ -7,6 +7,7 @@ function GlobalChat({ socket, comments, onClose }) {
   const author = 'Michael'; // Hardcoded - Michael always posts via UI, Sebastian via API
   const [sending, setSending] = useState(false);
   const [typingUsers, setTypingUsers] = useState({});
+  const [streamingMessages, setStreamingMessages] = useState({}); // {commentId: text}
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const typingTimeoutsRef = useRef({}); // Track 30s timeouts per user
@@ -58,14 +59,28 @@ function GlobalChat({ socket, comments, onClose }) {
       }
     };
 
+    const handleStreaming = ({ id, message, done }) => {
+      if (done) {
+        setStreamingMessages(prev => {
+          const next = { ...prev };
+          delete next[id];
+          return next;
+        });
+      } else {
+        setStreamingMessages(prev => ({ ...prev, [id]: message }));
+      }
+    };
+
     socket.on('typing:start', handleTypingStart);
     socket.on('typing:stop', handleTypingStop);
     socket.on('comment:created', handleCommentCreated);
+    socket.on('comment:streaming', handleStreaming);
 
     return () => {
       socket.off('typing:start', handleTypingStart);
       socket.off('typing:stop', handleTypingStop);
       socket.off('comment:created', handleCommentCreated);
+      socket.off('comment:streaming', handleStreaming);
       // Clean up all typing timeouts
       Object.values(typingTimeoutsRef.current).forEach(clearTimeout);
       typingTimeoutsRef.current = {};
@@ -171,8 +186,9 @@ function GlobalChat({ socket, comments, onClose }) {
                   </svg>
                 </button>
               </div>
-              <div className="message-content">
-                <ReactMarkdown>{comment.message}</ReactMarkdown>
+              <div className={`message-content${streamingMessages[comment.id] !== undefined ? ' streaming' : ''}`}>
+                <ReactMarkdown>{streamingMessages[comment.id] !== undefined ? streamingMessages[comment.id] : comment.message}</ReactMarkdown>
+                {streamingMessages[comment.id] !== undefined && <span className="streaming-cursor">▊</span>}
               </div>
             </div>
           ))

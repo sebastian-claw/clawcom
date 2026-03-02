@@ -143,3 +143,34 @@ router.delete('/:id', (req, res, next) => {
 });
 
 module.exports = router;
+
+// POST /api/comments/stream - Create or update a streaming comment
+router.post('/stream', (req, res, next) => {
+  try {
+    const { id, author, message, card_id, done } = req.body;
+    const io = req.app.locals.io;
+    const db = req.app.locals.db;
+    
+    if (id) {
+      // Update existing streaming comment
+      db.prepare('UPDATE comments SET message = ? WHERE id = ?').run(message, id);
+      io.emit('comment:streaming', { id, message, done: !!done });
+      if (done) {
+        const comment = db.prepare('SELECT * FROM comments WHERE id = ?').get(id);
+        io.emit('comment:updated', comment);
+      }
+      res.json({ id, status: done ? 'complete' : 'streaming' });
+    } else {
+      // Create new streaming comment
+      const result = db.prepare(
+        'INSERT INTO comments (card_id, author, message) VALUES (?, ?, ?)'
+      ).run(card_id || null, author, message || '');
+      const newComment = db.prepare('SELECT * FROM comments WHERE id = ?').get(result.lastInsertRowid);
+      io.emit('comment:created', newComment);
+      io.emit('comment:streaming', { id: newComment.id, message: newComment.message, done: false });
+      res.json(newComment);
+    }
+  } catch (error) {
+    next(error);
+  }
+});

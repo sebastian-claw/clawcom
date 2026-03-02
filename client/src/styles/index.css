@@ -1983,3 +1983,41 @@ body {
   padding: 24px;
   font-style: italic;
 }
+
+/* Streaming text cursor */
+.streaming-cursor {
+  display: inline-block;
+  animation: blink 0.7s step-end infinite;
+  color: #6366f1;
+  font-size: 14px;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.message-content.streaming {
+  border-left: 2px solid #6366f1;
+  padding-left: 8px;
+}
+
+/* Streaming text cursor */
+.streaming-cursor {
+  display: inline-block;
+  animation: blink 0.7s infinite;
+  color: #6366f1;
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.message-content.streaming p:last-child {
+  display: inline;
+}
