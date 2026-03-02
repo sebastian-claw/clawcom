@@ -3,6 +3,20 @@ const router = express.Router();
 const { notifyOpenClaw, chatToOpenClaw } = require('../webhook');
 const config = require('../config');
 
+// Simple rate limiting to prevent duplicate comments from same author
+const recentComments = new Map(); // author -> { message, timestamp }
+const RATE_LIMIT_MS = 3000; // 3 seconds between same author comments
+const MESSAGE_SIMILARITY_THRESHOLD = 0.8; // Consider duplicate if 80% similar
+
+// Simple text similarity function (Jaccard-like)
+function calculateSimilarity(str1, str2) {
+  const words1 = new Set(str1.toLowerCase().split(/\s+/));
+  const words2 = new Set(str2.toLowerCase().split(/\s+/));
+  const intersection = new Set([...words1].filter(x => words2.has(x)));
+  const union = new Set([...words1, ...words2]);
+  return intersection.size / union.size;
+}
+
 // Helper to emit comment events
 const emitCommentEvent = (io, event, comment) => {
   if (io) {
@@ -52,6 +66,22 @@ router.post('/', (req, res, next) => {
       return res.status(400).json({ error: 'Author and message are required' });
     }
 
+    // Rate limiting: prevent duplicate comments from same author
+    const now = Date.now();
+    const lastComment = recentComments.get(author);
+    if (lastComment) {
+      const timeDiff = now - lastComment.timestamp;
+      // Check similarity for recent comments (within 10 seconds)
+      if (timeDiff < 10000) {
+        const similarity = calculateSimilarity(message, lastComment.message);
+        if (similarity > MESSAGE_SIMILARITY_THRESHOLD) {
+          console.log(`[RateLimit] Blocking duplicate comment from ${author} (similarity: ${similarity.toFixed(2)}, time: ${timeDiff}ms)`);
+          return res.status(429).json({ error: 'Duplicate comment detected. Please wait.' });
+        }
+      }
+    }
+    recentComments.set(author, { message, timestamp: now });
+
     // If card_id is provided and not empty, validate it exists
     let finalCardId = null;
     if (card_id !== undefined && card_id !== '' && card_id !== null) {
@@ -80,8 +110,8 @@ router.post('/', (req, res, next) => {
 
     const location = cardTitle ? cardTitle : 'Global';
     const messagePreview = message.length > 50 ? message.substring(0, 50) + '...' : message;
-    // Skip webhook for Sebastian's own messages to avoid self-notification loop
-    if (author !== "Sebastian") {
+    // Skip webhook for AI's own messages to avoid self-notification loop
+    if (author !== config.aiName) {
       chatToOpenClaw(author, location, message);
     }
 
@@ -145,33 +175,3 @@ router.delete('/:id', (req, res, next) => {
 
 module.exports = router;
 
-// POST /api/comments/stream - Create or update a streaming comment
-router.post('/stream', (req, res, next) => {
-  try {
-    const { id, author, message, card_id, done } = req.body;
-    const io = req.app.locals.io;
-    const db = req.app.locals.db;
-    
-    if (id) {
-      // Update existing streaming comment
-      db.prepare('UPDATE comments SET message = ? WHERE id = ?').run(message, id);
-      io.emit('comment:streaming', { id, message, done: !!done });
-      if (done) {
-        const comment = db.prepare('SELECT * FROM comments WHERE id = ?').get(id);
-        io.emit('comment:updated', comment);
-      }
-      res.json({ id, status: done ? 'complete' : 'streaming' });
-    } else {
-      // Create new streaming comment
-      const result = db.prepare(
-        'INSERT INTO comments (card_id, author, message) VALUES (?, ?, ?)'
-      ).run(card_id || null, author, message || '');
-      const newComment = db.prepare('SELECT * FROM comments WHERE id = ?').get(result.lastInsertRowid);
-      io.emit('comment:created', newComment);
-      io.emit('comment:streaming', { id: newComment.id, message: newComment.message, done: false });
-      res.json(newComment);
-    }
-  } catch (error) {
-    next(error);
-  }
-});
