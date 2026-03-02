@@ -1,5 +1,10 @@
 # CLAWCOM
 
+<p align="center">
+  <img src="client/public/logo.svg" alt="CLAWCOM" width="200" />
+</p>
+
+
 A real-time kanban board and project management app built for small teams. Features drag-and-drop task management, live chat, comments, typing indicators, and WebSocket-powered instant updates across all connected clients.
 
 ## Features
