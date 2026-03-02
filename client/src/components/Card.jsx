@@ -1,24 +1,14 @@
 import { useState, useEffect } from 'react';
-
-// Team members with their colors
-const TEAM_COLORS = {
-  Michael: '#3b82f6', // Blue
-  Sebastian: '#a855f7', // Purple
-};
+import { getUserColor, getUserInitials } from '../config/users';
 
 function getAssigneeColor(name) {
   if (!name) return '#6b7280'; // Gray for unknown
-  return TEAM_COLORS[name] || '#6b7280';
+  return getUserColor(name);
 }
 
 function getInitials(name) {
   if (!name) return '';
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  return getUserInitials(name);
 }
 
 function Card({ card, onEdit, isOverlay, jobs = [], collapsed, onToggleCollapse, unreadCount = 0 }) {

@@ -2,12 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { createCard, updateCard, deleteCard, fetchComments, createComment, deleteComment } from '../api';
+import { users, currentUser } from '../config/users';
 
 // Team members for assignment
 const TEAM_MEMBERS = [
   { value: '', label: 'Unassigned' },
-  { value: 'Michael', label: 'Michael' },
-  { value: 'Sebastian', label: 'Sebastian' },
+  ...users.map(u => ({ value: u.id, label: u.name }))
 ];
 
 const CardModal = memo(function CardModal({ card, labels, jobs, currentJob, onClose, onSave, onDelete, socket, comments: initialComments }) {
@@ -29,7 +29,7 @@ const CardModal = memo(function CardModal({ card, labels, jobs, currentJob, onCl
   const typingTimeoutRef = useRef(null);
   const commentsEndRef = useRef(null);
   const typingTimeoutsRef = useRef({}); // Track 30s timeouts per user
-  const commentAuthor = 'Michael'; // Hardcoded - Michael always posts via UI, Sebastian via API
+  const commentAuthor = currentUser; // Configurable - set in config/users.js
 
   // Track the card ID to prevent form reset on WebSocket-triggered re-renders
   const lastCardIdRef = useRef(null);

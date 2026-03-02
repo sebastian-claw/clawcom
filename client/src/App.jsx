@@ -219,6 +219,12 @@ function App() {
       }
     });
 
+    socket.on('comment:updated', (comment) => {
+      if (!comment.card_id) {
+        setGlobalComments((prev) => prev.map((c) => c.id === comment.id ? { ...c, message: comment.message } : c));
+      }
+    });
+
     socket.on('comment:deleted', ({ id }) => {
       setGlobalComments((prev) => prev.filter((c) => c.id !== id));
     });
@@ -227,6 +233,8 @@ function App() {
       socket.disconnect();
     };
   }, [showCardMoved, showCardCreated, showCardDeleted, showNewComment, chatOpen]);
+
+
 
   // Load global comments on mount
   useEffect(() => {

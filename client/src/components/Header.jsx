@@ -1,3 +1,5 @@
+import { users } from '../config/users';
+
 function Header({ filters, onFilterChange, labels, jobs, currentJob, onJobChange, onOpenJobsModal, onToggleChat, onOpenSettings, onOpenDashboard, chatOpen, unreadChatCount }) {
   return (
     <header className="header">
@@ -89,8 +91,9 @@ function Header({ filters, onFilterChange, labels, jobs, currentJob, onJobChange
           >
             <option value="">All Assignments</option>
             <option value="unassigned">Unassigned</option>
-            <option value="Michael">Michael</option>
-            <option value="Sebastian">Sebastian</option>
+            {users.map(user => (
+              <option key={user.id} value={user.id}>{user.name}</option>
+            ))}
           </select>
         </div>
 
