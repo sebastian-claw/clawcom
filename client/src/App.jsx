@@ -76,8 +76,7 @@ function App() {
   const [activityOpen, setActivityOpen] = useState(false);
   const [socketInstance, setSocketInstance] = useState(null);
   const [unreadComments, setUnreadComments] = useState({}); // { cardId: count }
-  const [openCardId, setOpenCardId] = useState(null);
-  const [minimaxUsage, setMinimaxUsage] = useState(null); // Track which card is currently open in modal
+  const [openCardId, setOpenCardId] = useState(null); // Track which card is currently open in modal
   const openCardIdRef = useRef(null); // Ref to track open card ID without causing re-renders
 
   const sensors = useSensors(
@@ -240,24 +239,6 @@ function App() {
   // Load global comments on mount
   useEffect(() => {
     loadGlobalComments();
-  }, []);
-
-  // Fetch Minimax usage
-  useEffect(() => {
-    const fetchUsage = async () => {
-      try {
-        const res = await fetch('/api/usage/minimax');
-        const data = await res.json();
-        if (data.model_remains) {
-          setMinimaxUsage(data.model_remains[0]);
-        }
-      } catch (e) {
-        console.error('Failed to fetch usage', e); setMinimaxUsage({current_interval_usage_count: 0, current_interval_total_count: 1500});
-      }
-    };
-    fetchUsage();
-    const interval = setInterval(fetchUsage, 300000); // 5 min
-    return () => clearInterval(interval);
   }, []);
 
   // Request notification permission on first app open
@@ -563,7 +544,6 @@ function App() {
         onOpenDashboard={() => setDashboardOpen(true)}
         chatOpen={chatOpen}
         unreadChatCount={unreadChatCount}
-
       />
 
       <ActivityPanel
@@ -662,7 +642,6 @@ function App() {
           jobs={jobs}
         />
       )}
-            {/* Test: always show if null or has data */}
       <ToastContainer />
     </div>
   );

@@ -30,7 +30,6 @@ app.locals.io = io;
 seedDatabase(db);
 
 // Middleware
-app.get('/test', (req, res) => res.json({test: 'ok'}));
 app.use(cors());
 app.use(express.json());
 
@@ -43,7 +42,6 @@ const labelsRouter = require('./routes/labels');
 const jobsRouter = require('./routes/jobs');
 const commentsRouter = require('./routes/comments');
 const statsRouter = require('./routes/stats');
-const usageRouter = require('./routes/usage');
 
 app.use('/api/cards', cardsRouter);
 app.use('/api/labels', labelsRouter);
@@ -55,8 +53,6 @@ app.use('/api/stats', statsRouter);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
-app.use('/api/usage', usageRouter);
 
 // Serve React app for all other routes (SPA support)
 app.get('*', (req, res) => {
