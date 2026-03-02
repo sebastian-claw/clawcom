@@ -1,0 +1,22 @@
+{
+  "name": "clawcom",
+  "version": "1.0.0",
+  "description": "CLAWCOM - Kanban Board Web App",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "node server/index.js",
+    "client": "npm run dev --prefix client",
+    "build": "npm run build --prefix client",
+    "start": "npm run server",
+    "install:all": "npm install && npm install --prefix client"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
