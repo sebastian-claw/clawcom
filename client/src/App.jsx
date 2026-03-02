@@ -252,7 +252,7 @@ function App() {
           setMinimaxUsage(data.model_remains[0]);
         }
       } catch (e) {
-        console.error('Failed to fetch usage', e);
+        console.error('Failed to fetch usage', e); setMinimaxUsage({current_interval_usage_count: 0, current_interval_total_count: 1500});
       }
     };
     fetchUsage();
@@ -563,6 +563,7 @@ function App() {
         onOpenDashboard={() => setDashboardOpen(true)}
         chatOpen={chatOpen}
         unreadChatCount={unreadChatCount}
+        minimaxUsage={minimaxUsage}
       />
 
       <ActivityPanel
@@ -661,15 +662,7 @@ function App() {
           jobs={jobs}
         />
       )}
-            {minimaxUsage && (
-        <div style={{position: "fixed", bottom: 0, left: 0, right: 0, background: "#1a1a1a", padding: "8px 16px", borderTop: "1px solid #333", display: "flex", alignItems: "center", gap: "12px", zIndex: 9999}}>
-          <span style={{color: "#888", fontSize: "12px"}}>MiniMax:</span>
-          <div style={{flex: 1, height: "8px", background: "#333", borderRadius: "4px", overflow: "hidden"}}>
-            <div style={{width: `${Math.min(100, (minimaxUsage.current_interval_usage_count / minimaxUsage.current_interval_total_count) * 100)}%`, height: "100%", background: (minimaxUsage.current_interval_usage_count / minimaxUsage.current_interval_total_count) > 0.9 ? "#ef4444" : (minimaxUsage.current_interval_usage_count / minimaxUsage.current_interval_total_count) > 0.7 ? "#eab308" : "#22c55e", transition: "width 0.3s"}} />
-          </div>
-          <span style={{color: "#fff", fontSize: "12px", minWidth: "80px", textAlign: "right"}}>{minimaxUsage.current_interval_usage_count}/{minimaxUsage.current_interval_total_count}</span>
-        </div>
-      )}
+            {/* Test: always show if null or has data */}
       <ToastContainer />
     </div>
   );

@@ -1,8 +1,21 @@
 import { users } from '../config/users';
 
-function Header({ filters, onFilterChange, labels, jobs, currentJob, onJobChange, onOpenJobsModal, onToggleChat, onOpenSettings, onOpenDashboard, chatOpen, unreadChatCount }) {
+function Header({ filters, onFilterChange, labels, jobs, currentJob, onJobChange, onOpenJobsModal, onToggleChat, onOpenSettings, onOpenDashboard, chatOpen, unreadChatCount, minimaxUsage }) {
+  // Calculate percentage
+  const percent = minimaxUsage ? Math.round((minimaxUsage.current_interval_usage_count / minimaxUsage.current_interval_total_count) * 100) : 0;
+  const color = percent > 90 ? '#ef4444' : percent > 70 ? '#eab308' : '#22c55e';
+  
   return (
     <header className="header">
+      {minimaxUsage && (
+        <div style={{position: 'absolute', top: 0, right: 0, background: '#1a1a1a', padding: '4px 12px', fontSize: '11px', zIndex: 9999, display: 'flex', alignItems: 'center', gap: '8px', borderBottom: `3px solid ${color}`}}>
+          <span style={{color: '#888'}}>MiniMax:</span>
+          <div style={{width: '60px', height: '6px', background: '#333', borderRadius: '3px', overflow: 'hidden'}}>
+            <div style={{width: `${percent}%`, height: '100%', background: color}} />
+          </div>
+          <span style={{color: '#fff', fontWeight: 500}}>{percent}%</span>
+        </div>
+      )}
       <div className="header-left">
         <div className="header-logo">
           <img src="/logo.svg" alt="CLAWCOM" className="logo-img" />
