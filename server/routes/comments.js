@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { notifyOpenClaw, chatToOpenClaw } = require('../webhook');
+const config = require('../config');
 
 // Helper to emit comment events
 const emitCommentEvent = (io, event, comment) => {
