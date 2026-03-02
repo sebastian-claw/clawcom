@@ -563,7 +563,7 @@ function App() {
         onOpenDashboard={() => setDashboardOpen(true)}
         chatOpen={chatOpen}
         unreadChatCount={unreadChatCount}
-        minimaxUsage={minimaxUsage}
+
       />
 
       <ActivityPanel
