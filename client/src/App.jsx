@@ -76,7 +76,8 @@ function App() {
   const [activityOpen, setActivityOpen] = useState(false);
   const [socketInstance, setSocketInstance] = useState(null);
   const [unreadComments, setUnreadComments] = useState({}); // { cardId: count }
-  const [openCardId, setOpenCardId] = useState(null); // Track which card is currently open in modal
+  const [openCardId, setOpenCardId] = useState(null);
+  const [minimaxUsage, setMinimaxUsage] = useState(null); // Track which card is currently open in modal
   const openCardIdRef = useRef(null); // Ref to track open card ID without causing re-renders
 
   const sensors = useSensors(
@@ -239,6 +240,24 @@ function App() {
   // Load global comments on mount
   useEffect(() => {
     loadGlobalComments();
+  }, []);
+
+  // Fetch Minimax usage
+  useEffect(() => {
+    const fetchUsage = async () => {
+      try {
+        const res = await fetch('/api/usage/minimax');
+        const data = await res.json();
+        if (data.model_remains) {
+          setMinimaxUsage(data.model_remains[0]);
+        }
+      } catch (e) {
+        console.error('Failed to fetch usage', e);
+      }
+    };
+    fetchUsage();
+    const interval = setInterval(fetchUsage, 300000); // 5 min
+    return () => clearInterval(interval);
   }, []);
 
   // Request notification permission on first app open
@@ -641,6 +660,15 @@ function App() {
           onClose={() => setDashboardOpen(false)}
           jobs={jobs}
         />
+      )}
+            {minimaxUsage && (
+        <div style={{position: "fixed", bottom: 0, left: 0, right: 0, background: "#1a1a1a", padding: "8px 16px", borderTop: "1px solid #333", display: "flex", alignItems: "center", gap: "12px", zIndex: 9999}}>
+          <span style={{color: "#888", fontSize: "12px"}}>MiniMax:</span>
+          <div style={{flex: 1, height: "8px", background: "#333", borderRadius: "4px", overflow: "hidden"}}>
+            <div style={{width: `${Math.min(100, (minimaxUsage.current_interval_usage_count / minimaxUsage.current_interval_total_count) * 100)}%`, height: "100%", background: (minimaxUsage.current_interval_usage_count / minimaxUsage.current_interval_total_count) > 0.9 ? "#ef4444" : (minimaxUsage.current_interval_usage_count / minimaxUsage.current_interval_total_count) > 0.7 ? "#eab308" : "#22c55e", transition: "width 0.3s"}} />
+          </div>
+          <span style={{color: "#fff", fontSize: "12px", minWidth: "80px", textAlign: "right"}}>{minimaxUsage.current_interval_usage_count}/{minimaxUsage.current_interval_total_count}</span>
+        </div>
       )}
       <ToastContainer />
     </div>
