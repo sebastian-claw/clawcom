@@ -21,7 +21,7 @@ function GlobalChat({ socket, comments, onClose }) {
     if (!socket) return;
 
     const handleTypingStart = ({ author: typingAuthor }) => {
-      if (true) { // Show typing for all users, including self
+      if (typingAuthor !== author) {
         // Clear any existing timeout for this user before setting a new one
         if (typingTimeoutsRef.current[typingAuthor]) {
           clearTimeout(typingTimeoutsRef.current[typingAuthor]);
