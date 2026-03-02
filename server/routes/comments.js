@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { notifyOpenClaw, chatToOpenClaw } = require('../webhook');
-const config = require('../config');
 
 // Helper to emit comment events
 const emitCommentEvent = (io, event, comment) => {
@@ -80,8 +79,8 @@ router.post('/', (req, res, next) => {
 
     const location = cardTitle ? cardTitle : 'Global';
     const messagePreview = message.length > 50 ? message.substring(0, 50) + '...' : message;
-    // Skip webhook for AI's own messages to avoid self-notification loop
-    if (author !== config.aiName) {
+    // Skip webhook for Sebastian's own messages to avoid self-notification loop
+    if (author !== "Sebastian") {
       chatToOpenClaw(author, location, message);
     }
 

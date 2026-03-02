@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { createComment, deleteComment } from '../api';
-import { currentUser } from '../config/users';
 
 function GlobalChat({ socket, comments, onClose }) {
   const [newMessage, setNewMessage] = useState('');
-  const author = currentUser; // Configurable - set in config/users.js
+  const author = 'Michael'; // Hardcoded - Michael always posts via UI, Sebastian via API
   const [sending, setSending] = useState(false);
   const [typingUsers, setTypingUsers] = useState({});
   const [streamingMessages, setStreamingMessages] = useState({}); // {commentId: text}
